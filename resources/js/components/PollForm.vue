@@ -2,18 +2,25 @@
 import { reactive, ref } from 'vue';
 import { usePollStore } from '@/stores/usePollStore';
 
+const props = defineProps({
+  poll: { type: Object, default: null },
+});
+
 const emit = defineEmits(['saved', 'cancel']);
 
-const { createPoll } = usePollStore();
+const { createPoll, updatePoll } = usePollStore();
+
+const isEdit = props.poll !== null;
 
 const form = reactive({
-  title: '',
-  question: '',
-  options: [{ label: '' }, { label: '' }],
-  allow_multiple_choices: false,
-  results_public: false,
-  duration: '',
-  is_draft: true,
+  title:                  props.poll?.title ?? '',
+  question:               props.poll?.question ?? '',
+  options:                props.poll?.options?.map(o => ({ id: o.id, label: o.label }))
+                            ?? [{ label: '' }, { label: '' }],
+  allow_multiple_choices: props.poll?.allow_multiple_choices ?? false,
+  results_public:         props.poll?.results_public ?? false,
+  duration:               props.poll?.duration ?? '',
+  is_draft:               props.poll?.is_draft ?? true,
 });
 
 const errors = ref({});
@@ -50,7 +57,11 @@ async function submit() {
   };
 
   try {
-    await createPoll(payload);
+    if (isEdit) {
+      await updatePoll(props.poll.id, payload);
+    } else {
+      await createPoll(payload);
+    }
     emit('saved');
   } catch (err) {
     if (err?.data?.errors) {
@@ -66,7 +77,7 @@ async function submit() {
 
 <template>
   <div class="max-w-xl mx-auto p-4">
-    <h2 class="text-xl font-semibold mb-4">Nouveau sondage</h2>
+    <h2 class="text-xl font-semibold mb-4">{{ isEdit ? 'Modifier le sondage' : 'Nouveau sondage' }}</h2>
 
     <p v-if="errors.general" class="mb-3 text-sm text-red-600">{{ errors.general }}</p>
 
@@ -107,7 +118,7 @@ async function submit() {
       <input v-model="form.duration" type="number" min="1" class="w-full border rounded px-3 py-2 text-sm" placeholder="Ex: 3600 pour 1 heure" />
     </div>
 
-    <div class="mb-6">
+    <div v-if="!isEdit" class="mb-6">
       <label class="block text-sm font-medium mb-1">Mode de lancement</label>
       <div class="flex gap-4 text-sm">
         <label class="flex items-center gap-2">
@@ -123,7 +134,7 @@ async function submit() {
 
     <div class="flex gap-3">
       <button @click="submit" :disabled="submitting" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 disabled:opacity-50">
-        {{ submitting ? 'Enregistrement…' : 'Créer le sondage' }}
+        {{ submitting ? 'Enregistrement…' : (isEdit ? 'Enregistrer' : 'Créer le sondage') }}
       </button>
       <button @click="emit('cancel')" type="button" class="px-4 py-2 rounded text-sm border hover:bg-gray-50">
         Annuler

@@ -52,6 +52,52 @@ class ApiPollController extends Controller
 
 
     /**
+     * Update the specified poll.
+     */
+    public function update(Request $request, int $id)
+    {
+        $poll = Poll::where('id', $id)->where('user_id', $request->user()->id)->first();
+
+        if (!$poll) {
+            return response()->json(['message' => 'Poll not found.'], 404);
+        }
+
+        $data = $request->validate([
+            'question'               => 'required|string|max:500',
+            'title'                  => 'nullable|string|max:255',
+            'allow_multiple_choices' => 'boolean',
+            'allow_vote_change'      => 'boolean',
+            'results_public'         => 'boolean',
+            'duration'               => 'nullable|integer|min:1',
+            'options'                => 'required|array|min:2',
+            'options.*.id'           => 'nullable|integer',
+            'options.*.label'        => 'required|string|max:255',
+        ]);
+
+        $poll->update([
+            'question'               => $data['question'],
+            'title'                  => $data['title'] ?? null,
+            'allow_multiple_choices' => $data['allow_multiple_choices'] ?? $poll->allow_multiple_choices,
+            'allow_vote_change'      => $data['allow_vote_change'] ?? $poll->allow_vote_change,
+            'results_public'         => $data['results_public'] ?? $poll->results_public,
+            'duration'               => $data['duration'] ?? null,
+        ]);
+
+        $incomingIds = collect($data['options'])->pluck('id')->filter()->all();
+        $poll->options()->whereNotIn('id', $incomingIds)->delete();
+
+        foreach ($data['options'] as $opt) {
+            if (!empty($opt['id'])) {
+                $poll->options()->where('id', $opt['id'])->update(['label' => $opt['label']]);
+            } else {
+                $poll->options()->create(['label' => $opt['label']]);
+            }
+        }
+
+        return response()->json($poll->load('options'));
+    }
+
+    /**
      * Display a listing of the authenticated user's polls.
      */
     public function index(Request $request)

@@ -31,7 +31,7 @@ Déjà implémenté. `ApiPollController@remove` vérifie la propriété avant de
 
 ---
 
-### ☐ PUT /api/v1/polls/{id} — Modifier un sondage
+### ✅ PUT /api/v1/polls/{id} — Modifier un sondage
 
 1. Ajouter une méthode `update(Request $request, int $id)` dans `ApiPollController`
 2. Vérifier que le poll appartient à l'utilisateur connecté (404 sinon)

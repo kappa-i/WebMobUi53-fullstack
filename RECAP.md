@@ -67,9 +67,23 @@ Supprime un sondage en vérifiant que l'utilisateur connecté en est le proprié
 
 ---
 
-### ☐ PUT /api/v1/polls/{id} — Modification de sondage
+### ✅ PUT /api/v1/polls/{id} — Modification de sondage
 
-> À remplir après implémentation
+**Fichiers modifiés :**
+- `app/Http/Controllers/Api/v1/ApiPollController.php` — méthode `update()` ajoutée
+- `routes/api.php` — route `PUT /v1/polls/{id}` dans le groupe `auth:sanctum`
+- `resources/js/stores/usePollStore.js` — `updatePoll()` ajouté
+- `resources/js/components/PollForm.vue` — prop `poll` ajoutée, mode édition géré
+- `resources/js/components/PollTable.vue` — bouton "Modifier" ajouté, émet `edit`
+- `resources/js/AppPollDashboard.vue` — navigation par `view` ref (`list/create/edit`)
+
+**Choix techniques :**
+- `PollForm` est réutilisé pour création et édition via la prop `poll` (null = création)
+- `isEdit = props.poll !== null` détermine le mode et adapte le titre, le bouton et l'appel API
+- En édition, les options existantes sont pré-remplies avec leur `id` pour permettre la sync côté backend
+- Le backend supprime les options absentes du payload, met à jour celles avec un `id`, crée les nouvelles
+- Navigation dans le dashboard via `view = ref('list'|'create'|'edit')` — simple et lisible sans router
+- `PollTable` émet `edit` avec l'objet poll complet, le parent passe cet objet comme prop à `PollForm`
 
 ---
 

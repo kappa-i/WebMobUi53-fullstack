@@ -16,10 +16,17 @@ export function usePollStore() {
     return created;
   }
 
+  async function updatePoll(id, data) {
+    const updated = await fetchApi({ url: '/polls/' + id, data, method: 'PUT' });
+    const index = polls.value.findIndex(p => p.id === id);
+    if (index !== -1) polls.value[index] = updated;
+    return updated;
+  }
+
   async function deletePoll(id) {
     await fetchApi({ url: '/polls/' + id, method: 'DELETE' });
     polls.value = polls.value.filter(p => p.id !== id);
   }
 
-  return { polls, setPolls, createPoll, deletePoll };
+  return { polls, setPolls, createPoll, updatePoll, deletePoll };
 }
