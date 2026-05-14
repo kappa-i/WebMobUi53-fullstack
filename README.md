@@ -74,4 +74,4 @@ Pour développer et tester le mini-projet en local, voici les étapes à suivre 
     composer run dev
     ```
 
-L'application sera accessible à l'adresse <http://localhost:8000>.
+L'application sera accessible à l'adresse <http://127.0.0.1:8000>.

@@ -139,31 +139,33 @@ class DatabaseSeeder extends Seeder
                     ]
                 ]);
 
-                // Insert a test poll for John Doe
-                DB::table('polls')->insert([
-                    'id' => 1,
-                    'user_id' => 1,
-                    'title' => 'test',
-                    'question' => 'Quelle est votre réponse ?',
-                    'secret_token' => \Illuminate\Support\Str::random(32),
-                    'is_draft' => true,
-                    'allow_multiple_choices' => false,
-                    'allow_vote_change' => false,
-                    'results_public' => false,
-                    'duration' => null,
-                    'started_at' => null,
-                    'ends_at' => null,
-                    'created_at' => new \DateTime('2026-04-19 10:00:00'),
-                    'updated_at' => new \DateTime('2026-04-19 10:00:00'),
-                ]);
+                // Insert 10 test polls for John Doe
+                for ($i = 1; $i <= 10; $i++) {
+                    DB::table('polls')->insert([
+                        'id' => $i,
+                        'user_id' => 1,
+                        'title' => 'test',
+                        'question' => 'Quelle est votre réponse ?',
+                        'secret_token' => \Illuminate\Support\Str::random(32),
+                        'is_draft' => true,
+                        'allow_multiple_choices' => false,
+                        'allow_vote_change' => false,
+                        'results_public' => false,
+                        'duration' => null,
+                        'started_at' => null,
+                        'ends_at' => null,
+                        'created_at' => new \DateTime('2026-04-19 10:00:00'),
+                        'updated_at' => new \DateTime('2026-04-19 10:00:00'),
+                    ]);
 
-                // Insert options for the test poll
-                DB::table('poll_options')->insert([
-                    ['poll_id' => 1, 'label' => 'Réponse A', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
-                    ['poll_id' => 1, 'label' => 'Réponse B', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
-                    ['poll_id' => 1, 'label' => 'Réponse C', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
-                    ['poll_id' => 1, 'label' => 'La réponse D', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
-                ]);
+                    // Insert options for the poll
+                    DB::table('poll_options')->insert([
+                        ['poll_id' => $i, 'label' => 'Réponse A', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
+                        ['poll_id' => $i, 'label' => 'Réponse B', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
+                        ['poll_id' => $i, 'label' => 'Réponse C', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
+                        ['poll_id' => $i, 'label' => 'La réponse D', 'created_at' => new \DateTime('2026-04-19 10:00:00'), 'updated_at' => new \DateTime('2026-04-19 10:00:00')],
+                    ]);
+                }
             }
         );
     }

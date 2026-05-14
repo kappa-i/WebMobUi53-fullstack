@@ -10,7 +10,6 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/poll-dashboard.js',
-                'resources/js/poll-dashboard-integrated.js',
             ],
             refresh: true,
         }),

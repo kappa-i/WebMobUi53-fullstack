@@ -33,4 +33,20 @@ class ApiPollController extends Controller
 
         return $poll;
     }
+
+    /**
+     * Remove the specified poll.
+     */
+    public function remove(Request $request, int $id)
+    {
+        $poll = Poll::where('id', $id)->where('user_id', $request->user()->id)->first();
+
+        if (!$poll) {
+            return response()->json(['message' => 'Poll not found.'], 404);
+        }
+
+        $poll->delete();
+
+        return response()->json(['message' => 'success'], 200);
+    }
 }
