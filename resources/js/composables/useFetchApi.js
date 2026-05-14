@@ -67,6 +67,7 @@ export function useFetchApi(baseUrl = null, additionalHeaders = {}) {
         headers: allHeaders,
         body: data != null ? JSON.stringify(data) : null,
         signal: controller.signal,
+        credentials: 'same-origin',
       })
       .then(response => {
         clearTimeout(timer);

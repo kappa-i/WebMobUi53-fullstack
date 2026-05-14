@@ -10,12 +10,16 @@ export function usePollStore() {
     polls.value = data;
   }
 
-  async function deletePoll(id) {
-    const result = await fetchApi({ url: 'polls/' + id, method: 'DELETE' });
-    if (result) {
-      polls.value = polls.value.filter(p => p.id !== id);
-    }
+  async function createPoll(data) {
+    const created = await fetchApi({ url: '/polls', data });
+    polls.value.unshift(created);
+    return created;
   }
 
-  return { polls, setPolls, deletePoll };
+  async function deletePoll(id) {
+    await fetchApi({ url: '/polls/' + id, method: 'DELETE' });
+    polls.value = polls.value.filter(p => p.id !== id);
+  }
+
+  return { polls, setPolls, createPoll, deletePoll };
 }
