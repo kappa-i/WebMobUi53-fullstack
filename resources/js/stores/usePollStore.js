@@ -2,9 +2,16 @@ import { ref } from 'vue';
 import { useFetchApi } from '@/composables/useFetchApi';
 
 const polls = ref([]);
+const loading = ref(false);
 
 export function usePollStore() {
   const { fetchApi } = useFetchApi();
+
+  async function fetchPolls() {
+    loading.value = true;
+    polls.value = await fetchApi({ url: '/polls' });
+    loading.value = false;
+  }
 
   function setPolls(data) {
     polls.value = data;
@@ -35,5 +42,5 @@ export function usePollStore() {
     polls.value = polls.value.filter(p => p.id !== id);
   }
 
-  return { polls, setPolls, createPoll, updatePoll, startPoll, deletePoll };
+  return { polls, loading, fetchPolls, setPolls, createPoll, updatePoll, startPoll, deletePoll };
 }

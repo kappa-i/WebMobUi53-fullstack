@@ -29,4 +29,9 @@
         class="mt-6 block w-full px-4 py-2 bg-teal-600 dark:bg-purple-900 text-white rounded-md hover:bg-teal-700 dark:hover:bg-purple-800 text-center">
         {{ __('ui.home.see_all_posts') }}
     </a>
+
+    <a href="{{ url('/polls/dashboard') }}"
+        class="mt-3 block w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-center">
+        Mes sondages
+    </a>
 </x-default-layout>

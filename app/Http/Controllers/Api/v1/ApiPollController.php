@@ -132,9 +132,84 @@ class ApiPollController extends Controller
     }
 
     /**
+     * Submit a vote on a poll.
+     */
+    public function vote(Request $request, string $token)
+    {
+        $poll = Poll::where('secret_token', $token)->first();
+
+        if (!$poll) {
+            return response()->json(['message' => 'Poll not found.'], 404);
+        }
+        if ($poll->is_draft) {
+            return response()->json(['message' => 'Ce sondage n\'est pas encore ouvert.'], 422);
+        }
+        if ($poll->ends_at && $poll->ends_at < now()) {
+            return response()->json(['message' => 'Ce sondage est terminé.'], 422);
+        }
+
+        $data = $request->validate([
+            'option_ids'   => 'required|array|min:1',
+            'option_ids.*' => 'integer',
+        ]);
+
+        if (!$poll->allow_multiple_choices && count($data['option_ids']) > 1) {
+            return response()->json(['message' => 'Un seul choix autorisé.'], 422);
+        }
+
+        $validIds = $poll->options()->pluck('id')->all();
+        foreach ($data['option_ids'] as $optId) {
+            if (!in_array($optId, $validIds)) {
+                return response()->json(['message' => 'Option invalide.'], 422);
+            }
+        }
+
+        $alreadyVoted = $poll->votes()->where('user_id', $request->user()->id)->exists();
+        if ($alreadyVoted && !$poll->allow_vote_change) {
+            return response()->json(['message' => 'Vous avez déjà voté.'], 422);
+        }
+
+        $poll->votes()->where('user_id', $request->user()->id)->delete();
+
+        foreach ($data['option_ids'] as $optId) {
+            $poll->votes()->create([
+                'user_id'        => $request->user()->id,
+                'poll_option_id' => $optId,
+            ]);
+        }
+
+        return response()->json(['message' => 'Vote enregistré.'], 201);
+    }
+
+    /**
+     * Get results for a poll.
+     */
+    public function results(Request $request, string $token)
+    {
+        $poll = Poll::where('secret_token', $token)->first();
+
+        if (!$poll) {
+            return response()->json(['message' => 'Poll not found.'], 404);
+        }
+
+        $isOwner = $request->user() && $request->user()->id === $poll->user_id;
+
+        if (!$poll->results_public && !$isOwner) {
+            return response()->json(['message' => 'Résultats privés.'], 403);
+        }
+
+        $options = $poll->options()->withCount('votes')->get();
+
+        return response()->json([
+            'options' => $options,
+            'total'   => $poll->votes()->count(),
+        ]);
+    }
+
+    /**
      * Display the specified poll by its secret token.
      */
-    public function show(string $token)
+    public function show(Request $request, string $token)
     {
         $poll = Poll::with(['options' => function ($query) {
             $query->withCount('votes');
@@ -143,6 +218,11 @@ class ApiPollController extends Controller
         if (!$poll) {
             return response()->json(['message' => 'Poll not found.'], 404);
         }
+
+        $userId = $request->user()?->id;
+        $poll->user_has_voted = $userId
+            ? $poll->votes()->where('user_id', $userId)->exists()
+            : false;
 
         return $poll;
     }

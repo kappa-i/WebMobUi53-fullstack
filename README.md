@@ -1,77 +1,103 @@
-# HEIG-VD DévProdMéd Course - Mini-projet
+# Application de sondage — Laravel + Vue.js
 
-Ce dépôt contient le mini-projet à réaliser dans le cadre du cours
-_"[Développement de produit média (DévProdMéd)](https://github.com/heig-vd-devprodmed-course/heig-vd-devprodmed-course)"_
-enseigné à la
-[Haute Ecole d'Ingénierie et de Gestion du Canton de Vaud (HEIG-VD)](https://heig-vd.ch),
-Suisse.
+Application web de sondage multi-plateforme (mobile first) développée avec Laravel 12 et Vue.js 3.
 
-## Objectif du mini-projet
+## Stack technique
 
-L'objectif de ce mini-projet est de créer un réseau social simple en utilisant le
-framework [Laravel](https://laravel.com/). Ce projet permettra de mettre en pratique les concepts
-appris dans le cours.
+- **Backend** : Laravel 12, PHP 8.2+, SQLite
+- **Frontend** : Vue.js 3.4 (Composition API), Tailwind CSS v4, Vite
+- **Auth** : Laravel Sanctum (SPA cookie — pas de Bearer token côté Vue)
 
-## Pré-requis
+## Installation
 
-Afin de lancer ce projet, une stack compatible avec Laravel, est requise.
+### Prérequis
 
-Voici les pré-requis nécessaires :
+- PHP >= 8.2
+- Composer
+- Node.js >= 18 et npm
 
-- PHP >= 8.0.
-- Composer.
-- Node.js et npm.
-- Une base de données (MySQL, PostgreSQL, SQLite, etc.).
-- Un serveur web (Apache, Nginx, etc.).
+### Étapes
 
-[Laravel Herd](https://helm.sh/docs/charts/laravel/) est recommandé pour une installation facile de Laravel et de ses dépendances.
+```bash
+# 1. Cloner le dépôt
+git clone <url-du-repo>
+cd <nom-du-repo>
 
-## Développement local
+# 2. Installer les dépendances
+composer install
+npm install
 
-Pour développer et tester le mini-projet en local, voici les étapes à suivre :
+# 3. Configurer l'environnement
+cp .env.example .env
+php artisan key:generate
+```
 
-1. Forker ce dépôt
+Dans `.env`, vérifier/adapter :
+```
+APP_URL=http://localhost:8000
+SANCTUM_STATEFUL_DOMAINS=localhost,localhost:8000,127.0.0.1,127.0.0.1:8000
+```
 
-2. Installer les dépendances avec npm et Composer :
+```bash
+# 4. Migrer la base de données
+php artisan migrate
 
-    ```bash
-    npm install && npm run build
+# 5. Démarrer les serveurs
+php artisan serve      # terminal 1
+npm run dev            # terminal 2
+```
 
-    composer install
-    ```
+L'application est accessible à **http://localhost:8000**.
 
-3. Copier le fichier `.env.example` en `.env`.
-4. Modifier les variables d'environnement si nécessaire (optionnel).
-5. Générer la clé d'application Laravel :
+## Fonctionnalités
 
-    ```bash
-    php artisan key:generate
-    ```
+### Dashboard (`/polls/dashboard`) — authentification requise
+- Liste des sondages avec statut (brouillon / actif / terminé)
+- Créer un sondage (question, options, paramètres, brouillon ou lancement immédiat)
+- Modifier un sondage (question, options, paramètres)
+- Supprimer un sondage
+- Démarrer un sondage en brouillon
+- Copier le lien de partage / accéder directement à la page de vote
 
-6. Créer le lien symbolique pour les fichiers téléversés :
+### Page de vote (`/polls/{token}`) — accessible sans authentification
+- Affichage de la question et des options
+- Vote (choix unique ou multiple selon configuration)
+- Options grisées si déjà voté
+- Message clair si le sondage est terminé ou en brouillon
+- Résultats en temps réel via polling (toutes les 5 secondes) avec graphique en barres
+- Accès aux résultats conditionnel : public pour tous, privé uniquement pour le propriétaire
 
-    ```bash
-    php artisan storage:link
-    ```
+## Architecture frontend
 
-7. Créer la base de données et exécuter les migrations :
+Deux applications Vue.js distinctes, chacune montée sur sa propre page Blade :
 
-    ```bash
-    php artisan migrate
-    ```
+| App | Entrypoint | Route |
+|-----|-----------|-------|
+| Dashboard | `poll-dashboard.js` | `/polls/dashboard` |
+| Vote | `poll-vote.js` | `/polls/{token}` |
 
-    S'il est nécessaire de réinitialiser la base de données, utiliser la commande `php artisan migrate:reset` puis `php artisan migrate` à nouveau.
+### Composants
+- `PollTable.vue` — tableau des sondages avec actions
+- `PollForm.vue` — formulaire création/édition (mode déterminé par la prop `poll`)
+- `VoteForm.vue` — formulaire de vote (radio ou checkbox selon `allow_multiple_choices`)
+- `ResultsChart.vue` — graphique en barres avec polling
 
-8. Optionnel : en mode développement, il est possible de peupler la base de données avec des données fictives :
+### Store
+`usePollStore.js` — singleton via `ref()` module-level (pas de Pinia). Expose : `fetchPolls`, `createPoll`, `updatePoll`, `startPoll`, `deletePoll`.
 
-    ```bash
-    php artisan db:seed
-    ```
+### Composables utilisés
+- `useFetchApi` — wrapper fetch avec CSRF Sanctum
+- `usePolling` — polling régulier pour les résultats en temps réel
 
-9. Démarrer le serveur de développement Laravel :
+## API JSON
 
-    ```bash
-    composer run dev
-    ```
-
-L'application sera accessible à l'adresse <http://127.0.0.1:8000>.
+| Méthode | Route | Auth | Description |
+|---------|-------|------|-------------|
+| GET | `/api/v1/polls` | ✅ | Liste des sondages |
+| POST | `/api/v1/polls` | ✅ | Créer un sondage |
+| PUT | `/api/v1/polls/{id}` | ✅ | Modifier un sondage |
+| DELETE | `/api/v1/polls/{id}` | ✅ | Supprimer un sondage |
+| POST | `/api/v1/polls/{id}/start` | ✅ | Démarrer un sondage |
+| GET | `/api/v1/polls/{token}` | ❌ | Afficher un sondage |
+| POST | `/api/v1/polls/{token}/votes` | ✅ | Voter |
+| GET | `/api/v1/polls/{token}/results` | ❌ | Résultats (conditionnel) |
