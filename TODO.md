@@ -13,7 +13,7 @@
 | ✅ | `DELETE /api/v1/polls/{id}` | Supprimer un sondage (auth) |
 | ✅ | `POST /api/v1/polls` | Créer un sondage (auth) |
 | ✅ | `PUT /api/v1/polls/{id}` | Modifier un sondage (auth, propriétaire) |
-| ☐ | `POST /api/v1/polls/{id}/start` | Démarrer un sondage (auth, proprio) — set `is_draft=false`, `started_at=now`, calcul `ends_at` si `duration` |
+| ✅ | `POST /api/v1/polls/{id}/start` | Démarrer un sondage (auth, proprio) — set `is_draft=false`, `started_at=now`, calcul `ends_at` si `duration` |
 | ☐ | `POST /api/v1/polls/{token}/votes` | Voter sur un sondage (auth) — valider unicité si choix unique |
 | ☐ | `GET /api/v1/polls/{token}/results` | Résultats d'un sondage — protéger si `results_public=false` et non-propriétaire |
 | ☐ | `PUT /api/v1/polls/{token}/votes` | *(Bonus)* Modifier un vote si `allow_vote_change=true` |

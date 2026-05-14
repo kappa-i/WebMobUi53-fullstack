@@ -16,6 +16,13 @@ export function usePollStore() {
     return created;
   }
 
+  async function startPoll(id) {
+    const started = await fetchApi({ url: '/polls/' + id + '/start', method: 'POST' });
+    const index = polls.value.findIndex(p => p.id === id);
+    if (index !== -1) polls.value[index] = { ...polls.value[index], ...started };
+    return started;
+  }
+
   async function updatePoll(id, data) {
     const updated = await fetchApi({ url: '/polls/' + id, data, method: 'PUT' });
     const index = polls.value.findIndex(p => p.id === id);
@@ -28,5 +35,5 @@ export function usePollStore() {
     polls.value = polls.value.filter(p => p.id !== id);
   }
 
-  return { polls, setPolls, createPoll, updatePoll, deletePoll };
+  return { polls, setPolls, createPoll, updatePoll, startPoll, deletePoll };
 }

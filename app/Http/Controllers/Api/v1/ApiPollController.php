@@ -98,6 +98,30 @@ class ApiPollController extends Controller
     }
 
     /**
+     * Start a draft poll.
+     */
+    public function start(Request $request, int $id)
+    {
+        $poll = Poll::where('id', $id)->where('user_id', $request->user()->id)->first();
+
+        if (!$poll) {
+            return response()->json(['message' => 'Poll not found.'], 404);
+        }
+
+        if (!$poll->is_draft) {
+            return response()->json(['message' => 'Poll is already started.'], 422);
+        }
+
+        $poll->update([
+            'is_draft'   => false,
+            'started_at' => now(),
+            'ends_at'    => $poll->duration ? now()->addSeconds($poll->duration) : null,
+        ]);
+
+        return response()->json($poll);
+    }
+
+    /**
      * Display a listing of the authenticated user's polls.
      */
     public function index(Request $request)

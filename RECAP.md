@@ -87,9 +87,18 @@ Supprime un sondage en vérifiant que l'utilisateur connecté en est le proprié
 
 ---
 
-### ☐ POST /api/v1/polls/{id}/start — Démarrage de sondage
+### ✅ POST /api/v1/polls/{id}/start — Démarrage de sondage
 
-> À remplir après implémentation
+**Fichiers modifiés :**
+- `app/Http/Controllers/Api/v1/ApiPollController.php` — méthode `start()` ajoutée
+- `routes/api.php` — route `POST /v1/polls/{id}/start` dans le groupe `auth:sanctum`
+- `resources/js/stores/usePollStore.js` — `startPoll()` ajouté
+- `resources/js/components/PollTable.vue` — bouton "Démarrer" visible uniquement si `is_draft = true`
+
+**Choix techniques :**
+- Le bouton "Démarrer" est affiché avec `v-if="poll.is_draft"` — disparaît automatiquement après le démarrage
+- Après succès, le store met à jour le poll en place via spread (`{ ...polls.value[index], ...started }`) pour conserver les options et autres champs non retournés par cet endpoint
+- `ends_at` calculé côté backend uniquement si `duration` est défini, sinon null (sondage sans fin)
 
 ---
 

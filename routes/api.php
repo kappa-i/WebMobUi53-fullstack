@@ -24,5 +24,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/v1/polls', [ApiPollController::class, 'index']);
     Route::post('/v1/polls', [ApiPollController::class, 'store']);
     Route::put('/v1/polls/{id}', [ApiPollController::class, 'update']);
+    Route::post('/v1/polls/{id}/start', [ApiPollController::class, 'start']);
     Route::delete('/v1/polls/{id}', [ApiPollController::class, 'remove']);
 });

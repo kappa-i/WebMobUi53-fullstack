@@ -43,7 +43,7 @@ Déjà implémenté. `ApiPollController@remove` vérifie la propriété avant de
 
 ---
 
-### ☐ POST /api/v1/polls/{id}/start — Démarrer un sondage
+### ✅ POST /api/v1/polls/{id}/start — Démarrer un sondage
 
 1. Ajouter une méthode `start(Request $request, int $id)` dans `ApiPollController`
 2. Vérifier la propriété du sondage

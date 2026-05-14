@@ -3,7 +3,7 @@ import { usePollStore } from '@/stores/usePollStore';
 
 const emit = defineEmits(['edit']);
 
-const { polls, deletePoll } = usePollStore();
+const { polls, startPoll, deletePoll } = usePollStore();
 </script>
 
 <template>
@@ -24,6 +24,7 @@ const { polls, deletePoll } = usePollStore();
     <tbody>
       <tr v-for="poll in polls" :key="poll.id" class="hover:bg-gray-50">
         <td class="border px-3 py-2 flex gap-2">
+          <button v-if="poll.is_draft" @click="startPoll(poll.id)" class="bg-green-500 text-white px-2 py-1 rounded text-xs hover:bg-green-600">Démarrer</button>
           <button @click="emit('edit', poll)" class="bg-blue-500 text-white px-2 py-1 rounded text-xs hover:bg-blue-600">Modifier</button>
           <button @click="deletePoll(poll.id)" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Supprimer</button>
         </td>
