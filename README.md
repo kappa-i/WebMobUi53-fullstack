@@ -51,21 +51,27 @@ L'application est accessible à **http://localhost:8000**.
 
 ## Fonctionnalités
 
+### Page d'accueil (`/`)
+- Bouton "Mes sondages" → accès direct au dashboard
+
 ### Dashboard (`/polls/dashboard`) — authentification requise
-- Liste des sondages avec statut (brouillon / actif / terminé)
+- Liste des sondages avec statut (brouillon / actif / terminé) — mis à jour automatiquement sans rechargement
 - Créer un sondage (question, options, paramètres, brouillon ou lancement immédiat)
 - Modifier un sondage (question, options, paramètres)
 - Supprimer un sondage
 - Démarrer un sondage en brouillon
 - Copier le lien de partage / accéder directement à la page de vote
+- Bouton "Résultats" pour les sondages terminés
+- Retour à l'accueil
 
 ### Page de vote (`/polls/{token}`) — accessible sans authentification
 - Affichage de la question et des options
 - Vote (choix unique ou multiple selon configuration)
 - Options grisées si déjà voté
 - Message clair si le sondage est terminé ou en brouillon
-- Résultats en temps réel via polling (toutes les 5 secondes) avec graphique en barres
+- Résultats en temps réel via polling (toutes les 5 secondes) avec graphique en barres animé
 - Accès aux résultats conditionnel : public pour tous, privé uniquement pour le propriétaire
+- Retour au dashboard
 
 ## Architecture frontend
 
@@ -83,7 +89,7 @@ Deux applications Vue.js distinctes, chacune montée sur sa propre page Blade :
 - `ResultsChart.vue` — graphique en barres avec polling
 
 ### Store
-`usePollStore.js` — singleton via `ref()` module-level (pas de Pinia). Expose : `fetchPolls`, `createPoll`, `updatePoll`, `startPoll`, `deletePoll`.
+`usePollStore.js` — gère la liste des sondages de manière partagée entre les composants. Toutes les opérations CRUD passent par lui (`fetchPolls`, `createPoll`, `updatePoll`, `startPoll`, `deletePoll`), ce qui garantit que l'affichage reste synchronisé sans recharger la page.
 
 ### Composables utilisés
 - `useFetchApi` — wrapper fetch avec CSRF Sanctum
